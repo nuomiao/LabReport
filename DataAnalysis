@@ -1,0 +1,75 @@
+import numpy as np
+
+#allocating values to data
+#uncert = percentage uncertianty
+Mass_Ring, Mass_Ring_Uncert = 16.98/1000, 0.05/16.98
+Length_Wire, Length_Wire_Uncert = 62.2/100, 0.1/62.2
+Length_Rod, Length_Rod_Uncert = 79/100, 0.1/79
+Mass_Rod, Mass_Rod_Uncert = 270/1000, 0.05/270
+Mass_Pendulum, Mass_Pendulum_Uncert = 744.84/1000, 0.05/744.84
+
+
+
+
+
+#inputing our measured data
+Torsion_Rod_T = np.array([17.85,18.56,18.04,18.64,19.05,18.67, 18.40])
+Torsion_Rod_T_Mean = np.mean(Torsion_Rod_T)
+
+Torsion_Pendulum_T = np.array([43.13,43.84,44.23,42.84,45.13,44.48,42.88])
+Torsion_Pendulum_T_Mean = np.mean(Torsion_Pendulum_T)
+
+Stiff_Pendulum_T = np.array([1.61,1.57,1.65,1.71,1.63,1.55,1.75])
+Stiff_Pendulum_T_Mean = np.mean(Stiff_Pendulum_T)
+
+
+
+
+
+#uncertainties in our measured data 
+#SE = Standard Error of Mean
+#absolute uncertainty = measured uncert + SE
+#percentage uncertainty = Absolute uncert/mean
+Torsion_Rod_SE = np.std(Torsion_Rod_T)/np.sqrt(len(Torsion_Rod_T)) 
+Torsion_Rod_Percentage_Uncertainty = (0.1 + Torsion_Rod_SE)/Torsion_Rod_T_Mean 
+#print(Torsion_Rod_Percentage_Uncertainty)
+
+Torsion_Pendulum_SE = np.std(Torsion_Pendulum_T)/np.sqrt(len(Torsion_Pendulum_T)) 
+Torsion_Pendulum_Percentage_Uncertainty = (0.1 + Torsion_Pendulum_SE)/Torsion_Pendulum_T_Mean 
+#print(Torsion_Pendulum_Percentage_Uncertainty)
+
+Stiff_Pendulum_SE = np.std(Stiff_Pendulum_T)/np.sqrt(len(Stiff_Pendulum_T)) 
+Stiff_Pendulum_Percentage_Uncertainty = (0.1 + Stiff_Pendulum_SE)/Stiff_Pendulum_T_Mean 
+#print(Stiff_Pendulum_Percentage_Uncertainty)
+
+
+
+
+
+#find moment of inertia for torsion rod
+#uncert = percentage uncertianty
+IR = (1/12)*Mass_Rod*Length_Rod**2
+IR_Uncert = Mass_Ring_Uncert+Length_Rod_Uncert*2
+#print(IR)
+
+    
+#Find moment of inertia for torsion pendulum
+TP = Torsion_Pendulum_T_Mean
+TR = Torsion_Rod_T_Mean
+IP = IR*(TP/TR)**2
+IP_Uncert = IR_Uncert+2*(Torsion_Pendulum_Percentage_Uncertainty+Torsion_Rod_Percentage_Uncertainty)
+#print(IP)
+
+#Find moment of inertia for stiff pendulum
+M = Mass_Pendulum
+h, h_uncert = 53.5/100,0.1/53.5
+I = IP + M*h**2
+I_Uncert = ((IP_Uncert*IP)+((Mass_Pendulum_Uncert+2*h_uncert)*(M*h**2)))/I
+
+#Find g
+g = (4*np.pi**2*I)/(M*h*Stiff_Pendulum_T_Mean**2)
+g_uncert = I_Uncert + Mass_Pendulum_Uncert + h_uncert + 2*Stiff_Pendulum_Percentage_Uncertainty
+#print(g)
+#print(g_uncert)
+#print(g*g_uncert) #our result is 10.78±1.85
+print("Our result for g is", g, "±", g*g_uncert,"ms^-2")
